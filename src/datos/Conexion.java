@@ -18,6 +18,8 @@ public class Conexion {
     private static String clave = "123";
     private static String url = "jdbc:oracle:thin:@localhost:1521:xe";
     
+   
+    
     
     public static Connection getConnection(){
         try {

@@ -1,10 +1,12 @@
 package datos;
 
 import clases.Persona;
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -19,6 +21,9 @@ public class PersonaDAO {
     private static final String SQL_UPDATE = "UPDATE PERSONA SET NOMBRES = ?, APELLIDOS = ?, IDCOMUNA = ? WHERE IDPERSONA = ? ";
 
     private static final String SQL_DELETE = "DELETE FROM PERSONA WHERE IDPERSONA = ?";
+    
+
+    
     //Consulta de base de datos con inner join 
     public void Listar() {
         Connection con = null;
@@ -163,6 +168,51 @@ public class PersonaDAO {
             }
         }
 
+        return nombreComuna;
+    }
+    
+    //Retorna un valor a traves de una funcion en pl/Sql
+    /*create or replace function FN_BUSCARNOMCOM(
+     P_IDCOMUNA NUMBER)
+     RETURN VARCHAR2
+     AS
+     V_NOMBRECOMUNA VARCHAR2(100);
+    BEGIN 
+     SELECT NOMBRECOMUNA INTO V_NOMBRECOMUNA
+    FROM comuna
+    WHERE idcomuna = P_IDCOMUNA;
+    RETURN V_NOMBRECOMUNA;
+    END; */
+    
+    public String getNombreComunaFN(int p_idComuna){
+        Connection con = null;
+        PreparedStatement pst = null;
+        ResultSet rs = null;
+        String nombreComuna = "";
+         CallableStatement st = null;
+
+       
+        try {
+            con = Conexion.getConnection();
+            st = con.prepareCall("{?= call FN_BUSCARNOMCOM(?)}");
+            st.registerOutParameter(1, java.sql.Types.VARCHAR);
+            st.setInt(2, p_idComuna);
+            st.executeUpdate();
+            nombreComuna = st.getString(1);
+               
+        } catch (Exception e) {
+            e.printStackTrace(System.out);
+            
+        }finally {
+            try {
+                st.close();
+                con.close();
+            } catch (SQLException e) {
+                e.printStackTrace(System.out);
+            }
+        }
+        
+        
         return nombreComuna;
     }
 
